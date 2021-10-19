@@ -1,0 +1,20 @@
+{
+  "name": "dao",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "install-deps-mac": "npm run install-geth-mac && npm run install-solc-mac",
+    "install-geth-mac": "curl -fL# https://gethstore.blob.core.windows.net/builds/geth-darwin-amd64-1.10.10-bb74230f.tar.gz | tar xvzO geth-darwin-amd64-1.10.10-bb74230f/geth > bin/geth && chmod +x bin/geth",
+    "install-solc-mac": "curl -fL# https://github.com/ethereum/solidity/releases/download/v0.8.9/solc-macos > bin/solc && chmod +x bin/solc",
+    "clean-deps": "rm -f bin/geth bin/solc",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1",
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "ethers": "^5.4.6",
+    "tap-esm": "^1.4.1"
+  },
+  "author": "jesse.tane@gmail.com",
+  "license": "MIT"
+}
