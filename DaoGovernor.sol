@@ -20,18 +20,18 @@ contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorCountingSimp
         __Governor_init("DaoGovernor");
         __GovernorCountingSimple_init();
         __GovernorVotes_init(_token);
-        __GovernorVotesQuorumFraction_init(50);
+        __GovernorVotesQuorumFraction_init(25);
         __GovernorTimelockControl_init(_timelock);
         __Ownable_init();
         __UUPSUpgradeable_init();
     }
 
     function votingDelay() public pure override returns (uint256) {
-        return 1; // 1 block
+        return 1;
     }
 
     function votingPeriod() public pure override returns (uint256) {
-        return 1; // 1 block
+        return 2;
     }
 
     function _authorizeUpgrade(address newImplementation)
