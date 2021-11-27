@@ -3,10 +3,11 @@ import { dirname } from 'path'
 import fs from 'fs/promises'
 import tap from 'tap-esm'
 import { ethers } from 'ethers'
-import watchTx from './utils/watch-tx.js'
-import compile from './utils/compile.js'
-import deploy from './utils/deploy.js'
-import startGeth from './utils/geth.js'
+import toolsConfig from 'eth-tools/config.js'
+import watchTx from 'eth-tools/watch-tx.js'
+import compile from 'eth-tools/compile.js'
+import deploy from 'eth-tools/deploy.js'
+import startGeth from 'eth-tools/geth.js'
 
 const __dirname = `${dirname(fileURLToPath(import.meta.url))}`
 const workDir = `${__dirname}/tmp/test`
@@ -25,15 +26,17 @@ tap('setup work dir', async t => {
 
 tap('start geth', async t => {
   t.plan(1)
-  geth = await startGeth(`${__dirname}/bin/geth`, { port: '7357', datadir: `${__dirname}/tmp/test` })
+  geth = await startGeth(`${__dirname}/bin/geth`, { port: '7357', datadir: workDir })
   t.ok(geth)
 })
 
 tap('have provider with dev account "deployer"', async t => {
   t.plan(1)
-  provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7357')
-  let providerAccounts = await provider.listAccounts()
+  provider = new ethers.providers.JsonRpcProvider('http://localhost:7357')
+  const providerAccounts = await provider.listAccounts()
   deployer = await provider.getSigner(providerAccounts[0])
+  toolsConfig.provider = provider
+  toolsConfig.ethers = ethers
   t.ok(deployer)
 })
 
@@ -115,7 +118,7 @@ tap('create and setup test accounts', async t => {
     const account = ethers.Wallet.createRandom().connect(provider)
     accounts.push(account)
     // send 1k ether
-    await watchTx(deployer.sendTransaction({ to: account.address, value: oneThousandEth }), provider)
+    await watchTx(deployer.sendTransaction({ to: account.address, value: oneThousandEth }))
     const balance = await provider.getBalance(account.address)
     t.ok(balance.eq(oneThousandEth))
     // mint some voting tokens

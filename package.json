@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "install-deps-mac": "npm run install-geth-mac && npm run install-solc-mac",
-    "install-geth-mac": "curl -fL# https://gethstore.blob.core.windows.net/builds/geth-darwin-amd64-1.10.10-bb74230f.tar.gz | tar xvzO geth-darwin-amd64-1.10.10-bb74230f/geth > bin/geth && chmod +x bin/geth",
-    "install-solc-mac": "curl -fL# https://github.com/ethereum/solidity/releases/download/v0.8.9/solc-macos > bin/solc && chmod +x bin/solc",
-    "clean-deps": "rm -f bin/geth bin/solc",
+    "install-geth": "mkdir -p bin && node_modules/eth-tools/download-geth.sh 1.10.13 > bin/geth && chmod +x bin/geth",
+    "install-solc": "mkdir -p bin && node_modules/eth-tools/download-solc.sh 0.8.9 > bin/solc && chmod +x bin/solc",
     "test": "node test.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "eth-tools": "github:jessetane/eth-tools#1.2.0",
     "ethers": "^5.4.6",
     "tap-esm": "^1.4.1"
   },
