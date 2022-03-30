@@ -200,7 +200,7 @@ tap('lookup proposal and vote on it', async t => {
   // spin until voting period is closed
   await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
   // state should be success
-  const state = await watchTx(governor.state(proposalId))
+  const state = await governor.state(proposalId)
   t.equal(state, 4)
 })
 
