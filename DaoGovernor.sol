@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorSettingsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorCountingSimpleUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesQuorumFractionUpgradeable.sol";
@@ -10,28 +11,21 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorCountingSimpleUpgradeable, GovernorVotesUpgradeable, GovernorVotesQuorumFractionUpgradeable, GovernorTimelockControlUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorSettingsUpgradeable, GovernorCountingSimpleUpgradeable, GovernorVotesUpgradeable, GovernorVotesQuorumFractionUpgradeable, GovernorTimelockControlUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(ERC20VotesUpgradeable _token, TimelockControllerUpgradeable _timelock)
+    function initialize(IVotesUpgradeable _token, TimelockControllerUpgradeable _timelock)
         initializer public
     {
         __Governor_init("DaoGovernor");
+        __GovernorSettings_init(1, 1, 0);
         __GovernorCountingSimple_init();
         __GovernorVotes_init(_token);
         __GovernorVotesQuorumFraction_init(25);
         __GovernorTimelockControl_init(_timelock);
         __Ownable_init();
         __UUPSUpgradeable_init();
-    }
-
-    function votingDelay() public pure override returns (uint256) {
-        return 1;
-    }
-
-    function votingPeriod() public pure override returns (uint256) {
-        return 2;
     }
 
     function _authorizeUpgrade(address newImplementation)
@@ -41,6 +35,24 @@ contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorCountingSimp
     {}
 
     // The following functions are overrides required by Solidity.
+
+    function votingDelay()
+        public
+        view
+        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
+        returns (uint256)
+    {
+        return super.votingDelay();
+    }
+
+    function votingPeriod()
+        public
+        view
+        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
+        returns (uint256)
+    {
+        return super.votingPeriod();
+    }
 
     function quorum(uint256 blockNumber)
         public
@@ -75,6 +87,15 @@ contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorCountingSimp
         returns (uint256)
     {
         return super.propose(targets, values, calldatas, description);
+    }
+
+    function proposalThreshold()
+        public
+        view
+        override(GovernorUpgradeable, GovernorSettingsUpgradeable)
+        returns (uint256)
+    {
+        return super.proposalThreshold();
     }
 
     function _execute(uint256 proposalId, address[] memory targets, uint256[] memory values, bytes[] memory calldatas, bytes32 descriptionHash)
