@@ -32,7 +32,7 @@ tap('start geth', async t => {
 
 tap('have provider with dev account "deployer"', async t => {
   t.plan(1)
-  provider = new ethers.providers.JsonRpcProvider('http://localhost:7357')
+  provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7357')
   const providerAccounts = await provider.listAccounts()
   deployer = await provider.getSigner(providerAccounts[0])
   toolsConfig.provider = provider
