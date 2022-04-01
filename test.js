@@ -14,7 +14,6 @@ const workDir = `${__dirname}/tmp/test`
 
 const contracts = {}
 const accounts = []
-const gasLimit = 5000000
 var geth, provider, deployer, build;
 
 tap('setup work dir', async t => {
@@ -122,7 +121,7 @@ tap('create and setup test accounts', async t => {
     const balance = await provider.getBalance(account.address)
     t.ok(balance.eq(oneThousandEth))
     // mint some voting tokens
-    await watchTx(token.mint(account.address, 100, { gasLimit }))
+    await watchTx(token.mint(account.address, 100))
     const tokenBalance = await token.balanceOf(account.address)
     t.equal(tokenBalance.toNumber(), 100)
     // delegate voting power
@@ -191,9 +190,9 @@ tap('lookup proposal and vote on it', async t => {
   // spin past voting delay
   await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
   // cast vote
-  await watchTx(governor.castVote(proposalId, 1, { gasLimit }))
+  await watchTx(governor.castVote(proposalId, 1))
   // should count 100 votes for, 0 against, 0 abstain
-  const votes = await watchTx(governor.proposalVotes(proposalId))
+  const votes = await governor.proposalVotes(proposalId)
   t.equal(votes.forVotes.toNumber(), 100)
   t.equal(votes.againstVotes.toNumber(), 0)
   t.equal(votes.abstainVotes.toNumber(), 0)
@@ -206,8 +205,8 @@ tap('lookup proposal and vote on it', async t => {
 
 tap('queue proposal and execute it', async t => {
   t.plan(1)
-  const timelock = contracts.DaoTimelockControllerProxy
-  const governor = contracts.DaoGovernorProxy
+  const user0 = accounts[0]
+  const governor = contracts.DaoGovernorProxy.connect(user0)
   const token = contracts.DaoTokenProxy
   const action = token.interface.encodeFunctionData('upgradeTo', [ contracts.DaoTokenV2.address ])
   const descriptionHash = ethers.utils.id('Proposal to upgrade voting token')
@@ -216,20 +215,16 @@ tap('queue proposal and execute it', async t => {
     [token.address],
     [0],
     [action],
-    descriptionHash,
-    { gasLimit }
+    descriptionHash
   ))
-  // wait 1s for timelock
-  await new Promise(res => {
-    setTimeout(res, 1000)
-  })
+  // spin past timelock
+  await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
   // execute
   await watchTx(governor.execute(
     [token.address],
     [0],
     [action],
-    descriptionHash,
-    { gasLimit }
+    descriptionHash
   ))
   t.pass()
 })
