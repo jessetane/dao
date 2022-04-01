@@ -217,7 +217,8 @@ tap('queue proposal and execute it', async t => {
     [action],
     descriptionHash
   ))
-  // spin past timelock
+  // wait 1s for timelock
+  await new Promise(res => setTimeout(res, 1000))
   await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
   // execute
   await watchTx(governor.execute(
