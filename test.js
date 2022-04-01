@@ -90,7 +90,7 @@ tap('deploy', async t => {
       build: build.contracts['node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'].ERC1967Proxy,
       preDeploy: (t, all) => {
         const impl = all.DaoGovernor.contract
-        const data = impl.interface.encodeFunctionData(impl.interface.getFunction('initialize'), [ all.DaoTokenProxy.contract.address, all.DaoTimelockControllerProxy.contract.address ])
+        const data = impl.interface.encodeFunctionData(impl.interface.getFunction('initialize'), [ all.DaoTokenProxy.contract.address, all.DaoTimelockControllerProxy.contract.address, 1, 1, 0 ])
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {

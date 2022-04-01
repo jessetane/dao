@@ -15,11 +15,15 @@ contract DaoGovernor is Initializable, GovernorUpgradeable, GovernorSettingsUpgr
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(IVotesUpgradeable _token, TimelockControllerUpgradeable _timelock)
-        initializer public
-    {
+    function initialize(
+      IVotesUpgradeable _token,
+      TimelockControllerUpgradeable _timelock,
+      uint256 initialVotingDelay,
+      uint256 initialVotingPeriod,
+      uint256 initialProposalThreshold
+    ) initializer public {
         __Governor_init("DaoGovernor");
-        __GovernorSettings_init(1, 1, 0);
+        __GovernorSettings_init(initialVotingDelay, initialVotingPeriod, initialProposalThreshold);
         __GovernorCountingSimple_init();
         __GovernorVotes_init(_token);
         __GovernorVotesQuorumFraction_init(25);
