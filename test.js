@@ -233,6 +233,60 @@ tap('return correct token version', async t => {
   t.equal(await contracts.DaoTokenProxy.version(), 'v2')
 })
 
+tap('show how governor\'s relay method works', async t => {
+  t.plan(3)
+  const token = contracts.DaoTokenProxy
+  const governor = contracts.DaoGovernorProxy
+  const timelock = contracts.DaoTimelockControllerProxy
+  const user0 = accounts[0]
+  // send some tokens to the governor
+  await watchTx(token.connect(user0).transfer(governor.address, 9))
+  let tokenBalance = await token.balanceOf(user0.address)
+  t.equal(tokenBalance.toNumber(), 91)
+  tokenBalance = await token.balanceOf(governor.address)
+  t.equal(tokenBalance.toNumber(), 9)
+  // user0 proposes transferring the tokens back to themselves
+  const subAction = token.interface.encodeFunctionData('transfer', [ user0.address, 9 ])
+  const action = governor.interface.encodeFunctionData('relay', [ token.address, 0, subAction ])
+  const description = 'Proposal to transfer tokens from treasury'
+  const descriptionHash = ethers.utils.id(description)
+  await watchTx(governor.connect(user0).propose(
+    [governor.address],
+    [0],
+    [action],
+    description
+  ))
+  // vote on the proposal
+  const events = await governor.queryFilter(governor.filters.ProposalCreated())
+  const proposalId = events[1].args.proposalId
+  // spin past voting delay
+  await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
+  // cast vote as user0
+  await watchTx(governor.connect(user0).castVote(proposalId, 1))
+  // spin until voting period is closed
+  await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
+  // queue proposal
+  await watchTx(governor.connect(user0).queue(
+    [governor.address],
+    [0],
+    [action],
+    descriptionHash
+  ))
+  // wait 1s for timelock
+  await new Promise(res => setTimeout(res, 1000))
+  await watchTx(deployer.sendTransaction({ to: user0.address, value: 0 }), provider)
+  // execute
+  await watchTx(governor.connect(user0).execute(
+    [governor.address],
+    [0],
+    [action],
+    descriptionHash
+  ))
+  // verify tokens have been transfered from the governor
+  tokenBalance = await token.balanceOf(user0.address)
+  t.equal(tokenBalance.toNumber(), 100)
+})
+
 tap('kill geth', async t => {
   t.plan(1)
   geth.close()
