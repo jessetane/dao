@@ -237,7 +237,6 @@ tap('show how governor\'s relay method works', async t => {
   t.plan(3)
   const token = contracts.DaoTokenProxy
   const governor = contracts.DaoGovernorProxy
-  const timelock = contracts.DaoTimelockControllerProxy
   const user0 = accounts[0]
   // send some tokens to the governor
   await watchTx(token.connect(user0).transfer(governor.address, 9))
