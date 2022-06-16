@@ -3,18 +3,17 @@ import { dirname } from 'path'
 import fs from 'fs/promises'
 import tap from 'tap-esm'
 import { ethers } from 'ethers'
-import toolsConfig from 'eth-tools/config.js'
-import watchTx from 'eth-tools/watch-tx.js'
-import compile from 'eth-tools/compile.js'
-import deploy from 'eth-tools/deploy.js'
-import startGeth from 'eth-tools/geth.js'
+import _watchTx from 'eth-scripts/watch-tx.js'
+import compile from 'eth-scripts/compile.js'
+import deploy from 'eth-scripts/deploy.js'
+import startGeth from 'eth-scripts/geth.js'
 
 const __dirname = `${dirname(fileURLToPath(import.meta.url))}`
 const workDir = `${__dirname}/tmp/test`
 
 const contracts = {}
 const accounts = []
-var geth, provider, deployer, build;
+var geth, provider, deployer, build, watchTx;
 
 tap('setup work dir', async t => {
   t.plan(1)
@@ -33,9 +32,8 @@ tap('have provider with dev account "deployer"', async t => {
   t.plan(1)
   provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7357')
   const providerAccounts = await provider.listAccounts()
+  watchTx = _watchTx.bind(null, provider)
   deployer = await provider.getSigner(providerAccounts[0])
-  toolsConfig.provider = provider
-  toolsConfig.ethers = ethers
   t.ok(deployer)
 })
 
@@ -54,7 +52,7 @@ tap('compile', async t => {
 })
 
 tap('deploy', async t => {
-  const templates = await deploy(deployer, {
+  const templates = await deploy(ethers, deployer, {
     DaoToken: {
       build: build.contracts['DaoToken.sol'].DaoToken
     },
@@ -66,7 +64,7 @@ tap('deploy', async t => {
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoToken.build.abi, deployer)
+        t.contract = new ethers.Contract(t.address, all.DaoToken.abi, deployer)
       }
     },
     DaoTimelockController: {
@@ -80,7 +78,7 @@ tap('deploy', async t => {
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoTimelockController.build.abi, deployer)
+        t.contract = new ethers.Contract(t.address, all.DaoTimelockController.abi, deployer)
       }
     },
     DaoGovernor: {
@@ -90,11 +88,11 @@ tap('deploy', async t => {
       build: build.contracts['node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'].ERC1967Proxy,
       preDeploy: (t, all) => {
         const impl = all.DaoGovernor.contract
-        const data = impl.interface.encodeFunctionData(impl.interface.getFunction('initialize'), [ all.DaoTokenProxy.contract.address, all.DaoTimelockControllerProxy.contract.address, 1, 1, 0 ])
+        const data = impl.interface.encodeFunctionData(impl.interface.getFunction('initialize'), [ all.DaoTokenProxy.address, all.DaoTimelockControllerProxy.address, 1, 1, 0 ])
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoGovernor.build.abi, deployer)
+        t.contract = new ethers.Contract(t.address, all.DaoGovernor.abi, deployer)
       }
     }
   })
@@ -164,7 +162,7 @@ tap('create proposal to upgrade token', async t => {
       'DaoTokenV2.sol': {}
     }
   })
-  const templates = await deploy(deployer, { 
+  const templates = await deploy(ethers, deployer, {
     DaoTokenV2: {
       build: build.contracts['DaoTokenV2.sol'].DaoToken
     }

@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "install-geth": "mkdir -p bin && download-geth 1.10.17 > bin/geth && chmod +x bin/geth",
-    "install-solc": "mkdir -p bin && download-solc 0.8.13 > bin/solc && chmod +x bin/solc",
+    "install-geth": "mkdir -p bin && download-geth 1.10.19 > bin/geth && chmod +x bin/geth",
+    "install-solc": "mkdir -p bin && download-solc 0.8.15 > bin/solc && chmod +x bin/solc",
     "test": "node test.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.5.0",
-    "@openzeppelin/contracts-upgradeable": "^4.5.2",
-    "eth-tools": "github:jessetane/eth-tools#1.3.0",
-    "ethers": "^5.6.2",
-    "tap-esm": "^1.4.1"
+    "@openzeppelin/contracts": "^4.6.0",
+    "@openzeppelin/contracts-upgradeable": "^4.6.0",
+    "eth-scripts": "github:jessetane/eth-scripts#2.0.1",
+    "ethers": "^5.6.8",
+    "tap-esm": "^2.0.0"
   },
   "author": "jesse.tane@gmail.com",
   "license": "MIT"
