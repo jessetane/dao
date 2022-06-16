@@ -21,7 +21,7 @@ $ npm run example
 
 What it does:
 * Spins up geth as a child process with a persistent data dir
-* Deploys the dao
+* Deploys the DAO
 * Generates an account and mints some initial voting tokens to it
 * Writes account private key, contract addresses and ABIs to `env.example.json`
 * Stays running so you can interact with it using dapps / wallets that allow you to talk to arbitrary networks (generally this just means they need to support custom RPC URL's)
