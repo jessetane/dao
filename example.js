@@ -12,10 +12,17 @@ import deploy from 'eth-scripts/deploy.js'
 const __dirname = `${dirname(fileURLToPath(import.meta.url))}`
 const workDir = `${__dirname}/tmp/example`
 
-// persists user account to disk
+// persists user account and contract abis to disk
 async function save () {
-  await fs.writeFile(`env.example.json`, JSON.stringify(env, null, 2))
+  await fs.writeFile(`${workDir}/env.example.json`, JSON.stringify(env, null, 2))
+  for (let name in env.contracts) {
+    const contract = env.contracts[name]
+    await fs.writeFile(`${workDir}/abis/${contract.address}`, contract.abi)
+  }
 }
+
+// generate workdir
+await fs.mkdir(workDir + '/abis', { recursive: true })
 
 // load user account
 let env = null
@@ -43,7 +50,6 @@ await save()
 
 // start geth
 console.log('starting geth')
-await fs.mkdir(workDir, { recursive: true })
 await startGeth(`${__dirname}/bin/geth`, { datadir: workDir, debug: true, host: '[::]', cors: 'http://localhost:8080' })
 console.log('geth started')
 
