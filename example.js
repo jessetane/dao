@@ -70,7 +70,10 @@ if (!env.contracts) env.contracts = {}
 const contracts = {}
 for (let name in env.contracts) {
   let contract = env.contracts[name]
-  contracts[name] = new ethers.Contract(contract.address, contract.abi, account)
+  if (name.indexOf('Proxy') > -1) {
+    contract.proxyAbi = env.contracts[name.replace('Proxy', '')].abi
+  }
+  contracts[name] = new ethers.Contract(contract.address, contract.proxyAbi || contract.abi, account)
 }
 
 // build and deploy if necessary
@@ -97,7 +100,7 @@ if (!contracts.DaoToken) {
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoToken.build.abi, account)
+        t.proxy = new ethers.Contract(t.address, all.DaoToken.build.abi, account)
       }
     },
     DaoTimelockController: {
@@ -111,7 +114,7 @@ if (!contracts.DaoToken) {
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoTimelockController.build.abi, account)
+        t.proxy = new ethers.Contract(t.address, all.DaoTimelockController.build.abi, account)
       }
     },
     DaoGovernor: {
@@ -125,14 +128,14 @@ if (!contracts.DaoToken) {
         t.args = [ impl.address, data ]
       },
       postDeploy: (t, all) => {
-        t.contract = new ethers.Contract(t.contract.address, all.DaoGovernor.build.abi, account)
+        t.proxy = new ethers.Contract(t.address, all.DaoGovernor.build.abi, account)
       }
     }
   })
   console.log('persisting contract metadata')
   for (let name in templates) {
     const template = templates[name]
-    contracts[name] = template.contract
+    contracts[name] = template.proxy || template.contract
     env.contracts[name] = {
       address: template.address,
       abi: template.contract.interface.format(ethers.utils.FormatTypes.json)
