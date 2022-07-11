@@ -28,7 +28,7 @@ await fs.mkdir(workDir + '/abis', { recursive: true })
 let env = null
 let account = null
 try {
-  env = JSON.parse(await fs.readFile(`env.example.json`))
+  env = JSON.parse(await fs.readFile(`${workDir}/env.example.json`))
   console.log('loading existing account')
   if (env.account.mnemonic) {
     account = ethers.Wallet.fromMnemonic(env.account.mnemonic, `m/44'/60'/0'/0/${env.account.index || 0}`)
