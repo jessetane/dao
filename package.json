@@ -11,7 +11,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
-    "eth-scripts": "github:jessetane/eth-scripts#2.1.1",
+    "eth-scripts": "github:jessetane/eth-scripts#2.1.2",
     "ethers": "^5.6.8",
     "tap-esm": "^2.0.0"
   },
