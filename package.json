@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "install-geth": "mkdir -p bin && download-geth 1.10.19 > bin/geth && chmod +x bin/geth",
-    "install-solc": "mkdir -p bin && download-solc 0.8.15 > bin/solc && chmod +x bin/solc",
+    "install-geth": "mkdir -p bin && download-geth 1.10.21 > bin/geth && chmod +x bin/geth",
+    "install-solc": "mkdir -p bin && download-solc 0.8.16 > bin/solc && chmod +x bin/solc",
     "test": "node test.js",
     "example": "node example.js"
   },
